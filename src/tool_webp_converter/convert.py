@@ -67,7 +67,7 @@ def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: i
             
             # Calculate reduction percentage
             reduction_percent = ((original_size - lossy_size) / original_size) * 100
-            logging.info(f"{original_format} → WebP (lossy): {output_path} ({lossy_size} bytes, -{reduction_percent:.1f}%)")
+            logging.info(f"{original_format} ({original_size} bytes) → WebP (lossy): {output_path} ({lossy_size} bytes, -{reduction_percent:.1f}%)")
         else:
             # Save lossless version
             lossless_buffer.seek(0)
@@ -76,6 +76,6 @@ def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: i
             
             # Calculate reduction percentage
             reduction_percent = ((original_size - lossless_size) / original_size) * 100
-            logging.info(f"{original_format} → WebP (lossless): {output_path} ({lossless_size} bytes, -{reduction_percent:.1f}%)")
+            logging.info(f"{original_format} ({original_size} bytes) → WebP (lossless): {output_path} ({lossless_size} bytes, -{reduction_percent:.1f}%)")
     
     return output_path
