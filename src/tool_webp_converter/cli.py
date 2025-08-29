@@ -7,6 +7,47 @@ from .convert import compress_image_to_webp
 SUPPORTED_FORMATS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.gif', '.webp'}
 
 
+def process_single_image(root_output_dir: Path, image_file: Path, input_dir: Path, recursive: bool, quality: int) -> tuple[bool, int, int]:
+    """
+    Process a single image file.
+    
+    Args:
+        root_output_dir: Root output directory
+        image_file: Path to the image file to process
+        input_dir: Input directory (for relative path calculation)
+        recursive: Whether we're in recursive mode
+        quality: Quality for lossy compression
+    
+    Returns:
+        Tuple of (success: bool, original_size: int, compressed_size: int)
+    """
+    # Determine output directory for this file
+    if recursive:
+        relative_path = image_file.relative_to(input_dir)
+        file_output_dir = root_output_dir / relative_path.parent
+    else:
+        file_output_dir = root_output_dir
+    
+    # Create output directory if it doesn't exist
+    file_output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Skip if output file already exists
+    output_file = file_output_dir / f"{image_file.stem}.webp"
+    if output_file.exists():
+        logging.info(f"Skipping {image_file.name} (output already exists)")
+        return False, 0, 0
+    
+    # Process the image
+    _, compressed_size = compress_image_to_webp(
+        input_path=image_file,
+        output_dir=file_output_dir,
+        quality=quality
+    )
+    
+    original_size = image_file.stat().st_size
+    return True, original_size, compressed_size
+
+
 def process_directory(input_dir: Path, output_dir: Path | None, quality: int, recursive: bool = False):
     """
     Process all image files in a directory.
@@ -19,6 +60,8 @@ def process_directory(input_dir: Path, output_dir: Path | None, quality: int, re
     """
     processed_count = 0
     error_count = 0
+    total_original_size = 0
+    total_compressed_size = 0
     
     image_files = []
     # Get all image files in the directory
@@ -44,35 +87,24 @@ def process_directory(input_dir: Path, output_dir: Path | None, quality: int, re
 
     for image_file in image_files:
         try:
-            # Maintain directory structure relative to input_dir
-            if recursive:
-                relative_path = image_file.relative_to(input_dir)
-                file_output_dir = root_output_dir / relative_path.parent
-            else:
-                file_output_dir = root_output_dir
-            
-            # Create output directory if it doesn't exist
-            file_output_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Skip if output file already exists
-            output_file = file_output_dir / f"{image_file.stem}.webp"
-            if output_file.exists():
-                logging.info(f"Skipping {image_file.name} (output already exists)")
-                continue
-            
-            # Process the image
-            compress_image_to_webp(
-                input_path=image_file,
-                output_dir=file_output_dir,
+            success, original_size, compressed_size = process_single_image(
+                root_output_dir=root_output_dir,
+                image_file=image_file,
+                input_dir=input_dir,
+                recursive=recursive,
                 quality=quality
             )
-            processed_count += 1
+            
+            if success:
+                total_original_size += original_size
+                total_compressed_size += compressed_size
+                processed_count += 1
             
         except Exception as e:
             logging.error(f"Error processing {image_file}: {e}")
             error_count += 1
     
-    return processed_count, error_count
+    return processed_count, error_count, total_original_size, total_compressed_size
 
 
 @click.command()
@@ -103,7 +135,7 @@ def main(input_path: Path, output_dir: Path, quality: int, verbose: bool, recurs
     try:
         if input_path.is_file():
             # Process single file
-            result_path = compress_image_to_webp(
+            result_path, _ = compress_image_to_webp(
                 input_path=input_path,
                 output_dir=output_dir,
                 quality=quality
@@ -113,7 +145,7 @@ def main(input_path: Path, output_dir: Path, quality: int, verbose: bool, recurs
         elif input_path.is_dir():
             # Process directory
             logging.info(f"Processing directory: {input_path}")
-            processed_count, error_count = process_directory(
+            processed_count, error_count, total_original_size, total_compressed_size = process_directory(
                 input_dir=input_path,
                 output_dir=output_dir,
                 quality=quality,
@@ -124,6 +156,12 @@ def main(input_path: Path, output_dir: Path, quality: int, verbose: bool, recurs
                 click.echo(f"⚠️  Completed with {error_count} errors")
             else:
                 click.echo(f"✅ Successfully processed {processed_count} files")
+            
+            # Display total compression statistics
+            if processed_count > 0:
+                total_reduction_percent = ((total_original_size - total_compressed_size) / total_original_size) * 100
+                total_saved_mb = (total_original_size - total_compressed_size) / (1024 * 1024)
+                click.echo(f"📊 Total compression: {total_original_size:,} bytes → {total_compressed_size:,} bytes (-{total_reduction_percent:.1f}%, saved {total_saved_mb:.1f} MB)")
                 
         else:
             click.echo(f"❌ Error: {input_path} is neither a file nor a directory", err=True)

@@ -5,7 +5,7 @@ from PIL import Image
 import io
 
 
-def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: int = 80) -> Path:
+def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: int = 80) -> tuple[Path, int]:
     """
     Compress an image to WebP format using both lossless and lossy compression,
     then save the one with the smallest file size.
@@ -16,7 +16,7 @@ def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: i
         quality: Quality for lossy compression (1-100, default 80)
     
     Returns:
-        Path to the saved WebP file
+        Tuple of (Path to the saved WebP file, compressed file size in bytes)
     """
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")
@@ -68,6 +68,7 @@ def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: i
             # Calculate reduction percentage
             reduction_percent = ((original_size - lossy_size) / original_size) * 100
             logging.info(f"{original_format} ({original_size} bytes) → WebP (lossy): {output_path} ({lossy_size} bytes, -{reduction_percent:.1f}%)")
+            compressed_size = lossy_size
         else:
             # Save lossless version
             lossless_buffer.seek(0)
@@ -77,5 +78,6 @@ def compress_image_to_webp(input_path: Path, output_dir: Path = None, quality: i
             # Calculate reduction percentage
             reduction_percent = ((original_size - lossless_size) / original_size) * 100
             logging.info(f"{original_format} ({original_size} bytes) → WebP (lossless): {output_path} ({lossless_size} bytes, -{reduction_percent:.1f}%)")
+            compressed_size = lossless_size
     
-    return output_path
+    return output_path, compressed_size
