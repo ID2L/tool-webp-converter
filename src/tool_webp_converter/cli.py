@@ -3,10 +3,35 @@ from pathlib import Path
 
 import click
 
-from .convert import compress_image_to_webp
+from .convert import compress_animated_webp, compress_image_to_webp
 
 # Supported image formats
 SUPPORTED_FORMATS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".gif", ".webp"}
+
+
+def is_animated_image(image_path: Path) -> bool:
+    """
+    Check if an image is animated (has multiple frames).
+
+    Args:
+        image_path: Path to the image file
+
+    Returns:
+        True if the image is animated, False otherwise
+    """
+    try:
+        from PIL import Image
+
+        with Image.open(image_path) as img:
+            # Try to seek to the second frame
+            img.seek(1)
+            return True
+    except (EOFError, IndexError):
+        # No second frame found, not animated
+        return False
+    except Exception:
+        # Error reading image, assume not animated
+        return False
 
 
 def process_single_image(
@@ -41,8 +66,13 @@ def process_single_image(
         logging.info(f"Skipping {image_file.name} (output already exists)")
         return False, 0, 0
 
-    # Process the image
-    _, compressed_size = compress_image_to_webp(input_path=image_file, output_dir=file_output_dir, quality=quality)
+    # Check if image is animated
+    if is_animated_image(image_file):
+        logging.info(f"Processing animated image: {image_file.name}")
+        _, compressed_size = compress_animated_webp(input_path=image_file, output_dir=file_output_dir, quality=quality)
+    else:
+        # Process the image
+        _, compressed_size = compress_image_to_webp(input_path=image_file, output_dir=file_output_dir, quality=quality)
 
     original_size = image_file.stat().st_size
     return True, original_size, compressed_size
@@ -136,7 +166,11 @@ def main(input_path: Path, output_dir: Path, quality: int, verbose: bool, recurs
     try:
         if input_path.is_file():
             # Process single file
-            result_path, _ = compress_image_to_webp(input_path=input_path, output_dir=output_dir, quality=quality)
+            if is_animated_image(input_path):
+                logging.info(f"Processing animated image: {input_path.name}")
+                result_path, _ = compress_animated_webp(input_path=input_path, output_dir=output_dir, quality=quality)
+            else:
+                result_path, _ = compress_image_to_webp(input_path=input_path, output_dir=output_dir, quality=quality)
             click.echo(f"✅ Successfully compressed: {result_path}")
 
         elif input_path.is_dir():
