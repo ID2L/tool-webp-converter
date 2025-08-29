@@ -1,13 +1,16 @@
 [project]
 name = "tool-webp-converter"
 version = "0.1.0"
-description = ""
+description = "A tool for optimal WebP image compression"
 authors = [
     { name = "guilhemheinrich", email = "guilhem.heinrich@gmail.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["pillow (>=11.3.0,<12.0.0)", "click (>=8.2.1,<9.0.0)"]
+
+[project.scripts]
+webp-converter = "tool_webp_converter.cli:main"
 
 [build-system]
 requires = [
@@ -21,15 +24,6 @@ packages = [
 ]
 
 [tool.poetry.group.dev.dependencies]
-pdoc = "*"
-tomli = "*"
-
-[tool.poetry.scripts]
-gen-doc = "pyscaf.documentation.scripts.parse_doc:gen_doc"
-serve-doc = "pyscaf.documentation.scripts.parse_doc:serve_doc"
-
-[tool.pyscaf.documentation]
-output_path = "docs"
 
 [tool.ruff]
 src = ["src"]
