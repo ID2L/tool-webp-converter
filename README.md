@@ -1,169 +1,110 @@
 # tool-webp-converter
 
-A Python project created with pyscaf
+A Python tool for optimal WebP image compression that automatically chooses between lossless and lossy compression to achieve the smallest file size.
 
-## Poetry Integration
+## Why WebP?
 
-This project uses Poetry for dependency management and packaging. Poetry provides a modern and efficient way to manage Python dependencies and build packages.
+WebP is a modern image format developed by Google that provides superior compression for images on the web. It offers:
 
-### Features
+- **Better compression**: 25-35% smaller file sizes compared to JPEG and PNG
+- **Lossless and lossy compression**: Choose the best compression method for your needs
+- **Transparency support**: Like PNG, but with better compression
+- **Animation support**: Similar to GIF but with much smaller file sizes
+- **Wide browser support**: Supported by all modern browsers
 
-- **Dependency Management**: Poetry manages project dependencies through `pyproject.toml`
-- **Virtual Environment**: Automatically creates and manages a virtual environment
-- **Build System**: Integrated build system for creating Python packages
-- **Lock File**: Generates a `poetry.lock` file for reproducible installations
+## Installation
 
-### Common Commands
+Install the package from PyPI:
+
+```bash
+pip install tool-webp-converter
+```
+
+## Usage
+
+The tool provides a command-line interface for converting images to WebP format. It automatically tests both lossless and lossy compression and saves the smaller file.
+
+### Basic Usage
+
+Convert a single image:
+```bash
+webp-converter image.jpg
+```
+
+Convert all images in a directory:
+```bash
+webp-converter /path/to/images/
+```
+
+### Command Line Options
+
+```bash
+webp-converter [OPTIONS] INPUT_PATH
+```
+
+**Arguments:**
+- `INPUT_PATH`: Path to the input image file or directory
+
+**Options:**
+- `-o, --output-dir PATH`: Output directory (defaults to input file directory)
+- `-q, --quality INTEGER`: Quality for lossy compression (1-100, default: 80)
+- `-v, --verbose`: Enable verbose logging
+- `-r, --recursive`: Process directories recursively
+
+### Examples
+
+Convert a single image with custom quality:
+```bash
+webp-converter photo.jpg --quality 90
+```
+
+Convert all images in a directory to a specific output folder:
+```bash
+webp-converter /path/to/images/ --output-dir /path/to/output/
+```
+
+Process a directory recursively (including subdirectories):
+```bash
+webp-converter /path/to/images/ --recursive
+```
+
+### Supported Formats
+
+The tool supports the following input formats:
+- JPEG (.jpg, .jpeg)
+- PNG (.png)
+- BMP (.bmp)
+- TIFF (.tiff, .tif)
+- GIF (.gif)
+- WebP (.webp)
+
+### How It Works
+
+1. **Dual Compression**: The tool creates both lossless and lossy WebP versions
+2. **Automatic Selection**: It automatically saves the smaller file
+3. **Quality Control**: You can adjust the quality for lossy compression (1-100)
+4. **Batch Processing**: Process single files or entire directories
+5. **Recursive Support**: Optionally process subdirectories
+
+### Output
+
+The tool provides detailed feedback including:
+- Compression statistics (original vs compressed size)
+- Percentage reduction achieved
+- Total space saved for batch operations
+- Error reporting for failed conversions
+
+## Development
+
+This project uses Poetry for dependency management. To set up the development environment:
 
 ```bash
 # Install dependencies
 poetry install
 
-# Add a new dependency
-poetry add package-name
-
-# Add a development dependency
-poetry add --dev package-name
-
-# Update dependencies
-poetry update
-
-# Run a command within the virtual environment
-poetry run python script.py
-
-# Activate the virtual environment
+# Activate virtual environment
 poetry shell
-```
 
-### Project Structure
-
-The project follows a standard Python package structure:
-- `pyproject.toml`: Project configuration and dependencies
-- `poetry.lock`: Locked dependencies for reproducible builds
-- `src/`: Source code directory
-- `tests/`: Test files directory
-
-### Development
-
-To start developing:
-1. Ensure Poetry is installed
-2. Run `poetry install` to install all dependencies
-3. Use `poetry shell` to activate the virtual environment
-4. Start coding!
-
-For more information, visit [Poetry's official documentation](https://python-poetry.org/docs/).
-
-## Ruff Integration
-
-Ruff is an extremely fast Python linter and code formatter, written in Rust. It can replace Flake8, Black, isort, pyupgrade, and more, while being much faster than any individual tool.
-
-### VSCode Default Configuration
-
-The file `.vscode/default_settings.json` provides a recommended configuration for using Ruff in VSCode:
-
-```json
-{
-    "[python]": {
-      "editor.formatOnSave": true,
-      "editor.codeActionsOnSave": {
-        "source.fixAll": "explicit",
-        "source.organizeImports": "explicit"
-      },
-      "editor.defaultFormatter": "charliermarsh.ruff"
-    },
-    "notebook.formatOnSave.enabled": true,
-    "notebook.codeActionsOnSave": {
-      "notebook.source.fixAll": "explicit",
-      "notebook.source.organizeImports": "explicit"
-    },
-    "ruff.lineLength": 88
-}
-```
-
-#### Explanation of each line:
-- `editor.formatOnSave`: Enables automatic formatting on save for all files.
-- `[python].editor.defaultFormatter`: Sets Ruff as the default formatter for Python files.
-- `[python]editor.codeActionsOnSave.source.organizeImports`: Organizes Python imports automatically on save.
-- `[python]editor.codeActionsOnSave.source.fixAll`: Applies all available code fixes (including linting) on save.
-- `ruff.lineLength`: Line length for your python files
-
-### Useful Ruff Commands
-
-You can run the following commands commands directly in the shell
-
-```bash
-# Lint all Python files in the current directory
-ruff check .
-
-# Format all Python files in the current directory
-ruff format .
-
-# Automatically fix all auto-fixable problems
-ruff check . --fix
-```
-
-For more information, see the [official Ruff VSCode extension documentation](https://github.com/astral-sh/ruff-vscode) and the [Ruff documentation](https://docs.astral.sh/ruff/). 
-
-You can enable specific rules over a catalog of over 800+ rules, depending on your needs or framework of choice. Check it out at the [Ruff documentation](docs.astral.sh/ruff/rules/). 
-
-## Git Integration
-
-This project uses Git for version control, providing a robust system for tracking changes, collaborating, and managing code history.
-
-### Features
-
-- **Version Control**: Track changes and manage code history
-- **Branching**: Create and manage feature branches
-- **Collaboration**: Work with remote repositories
-- **Git Hooks**: Automated scripts for repository events
-
-### Common Commands
-
-```bash
-# Initialize repository
-git init
-
-# Clone repository
-git clone <repository-url>
-
-# Create and switch to new branch
-git checkout -b feature-name
-
-# Stage changes
-git add .
-
-# Commit changes
-git commit -m "commit message"
-
-# Push changes
-git push origin branch-name
-
-# Pull latest changes
-git pull origin branch-name
-```
-
-### Project Structure
-
-The project includes:
-- `.git/`: Git repository data
-- `.gitignore`: Specifies intentionally untracked files
-- `.gitattributes`: Defines attributes for paths
-- `hooks/`: Custom Git hooks (if present)
-
-### Development Workflow
-
-1. Create a new branch for features/fixes
-2. Make changes and commit regularly
-3. Push changes to remote repository
-4. Create pull requests for code review
-5. Merge approved changes to main branch
-
-### Best Practices
-
-- Write clear commit messages
-- Keep commits focused and atomic
-- Use meaningful branch names
-- Regularly pull from main branch
-- Review changes before committing
-
-For more information, visit [Git's official documentation](https://git-scm.com/doc). 
+# Run the tool
+python -m tool_webp_converter.cli image.jpg
+``` 
