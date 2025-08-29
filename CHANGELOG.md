@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v0.2.0 (2025-08-29)
+
+### Bug Fixes
+
+- Ruff fixall
+  ([`7a9849c`](https://github.com/ID2L/tool-webp-converter/commit/7a9849c053319d48a49f73374ed102217c9e5e23))
+
+### Chores
+
+- Added readme.md
+  ([`e8e8ac0`](https://github.com/ID2L/tool-webp-converter/commit/e8e8ac0ffe534d3c6a14bff98d706631ccee3488))
+
+### Features
+
+- Added transparency and animation support
+  ([`c3d87be`](https://github.com/ID2L/tool-webp-converter/commit/c3d87bef0efc38636d21c828edb3f1d75e9ee4d2))
+
+
 ## v0.1.0 (2025-08-29)
 
 ### Chores
